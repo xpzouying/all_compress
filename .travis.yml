@@ -4,11 +4,9 @@ go:
     - 1.7
     - 1.8
 
-  install:
+install:
     - go get github.com/xpzouying/compress
 
-  script:
+script:
     - go test -v ./tar
     - go test -v ./zip
-    # - go test -v github.com/xpzouying/compress/tar
-    # - go test -v github.com/xpzouying/compress/zip
