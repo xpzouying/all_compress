@@ -1,0 +1,14 @@
+language: go
+
+go:
+    - 1.5
+    - 1.6
+    - 1.7.x
+    - 1.8
+    - master
+
+  script:
+    - go test -v ./tar
+    - go test -v ./zip
+    # - go test -v github.com/xpzouying/compress/tar
+    # - go test -v github.com/xpzouying/compress/zip
