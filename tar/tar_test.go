@@ -1,4 +1,4 @@
-package zip
+package tar
 
 import (
 	"fmt"
@@ -8,10 +8,9 @@ import (
 	"github.com/xpzouying/compress"
 )
 
-func TestZipAFile(t *testing.T) {
-	src := "zip_test.go"
-	dst := "zip_test.go.zip"
-
+func TestTarAFile(t *testing.T) {
+	src := "tar_test.go"
+	dst := "tar_test.go.tar"
 	err := compress.Compress(dst, src)
 	if err != nil {
 		fmt.Println("Error: ", err)

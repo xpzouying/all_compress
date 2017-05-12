@@ -1,9 +1,7 @@
-// Implement of compress with zip.
-
-package zip
+package tar
 
 import (
-	"archive/zip"
+	"archive/tar"
 	"errors"
 	"fmt"
 	"io"
@@ -20,7 +18,6 @@ var (
 	ErrSrcNotSupportDir = errors.New("not support dir yet")
 )
 
-// Compress file
 func Compress(dst, src string) error {
 	// make sure src file is exists
 	srcInfo, err := os.Stat(src)
@@ -36,9 +33,14 @@ func Compress(dst, src string) error {
 		return ErrDstExists
 	}
 
+	// compress src file
+	if srcInfo.IsDir() {
+		return ErrSrcNotSupportDir
+	}
+
 	// make sure dest file is *.zip
 	ff := filepath.Ext(dst)
-	if ".zip" != ff {
+	if ".tar" != ff {
 		return ErrFileFormat
 	}
 
@@ -49,29 +51,27 @@ func Compress(dst, src string) error {
 	}
 	defer d.Close()
 
-	w := zip.NewWriter(d)
+	w := tar.NewWriter(d)
 	defer w.Close()
 
-	// create a file in `zip`.
-	// create file header use src.
-	fileInZip, err := w.Create(srcInfo.Name())
-	if err != nil {
-		return err
-	}
-
-	// compress src file
-	if srcInfo.IsDir() {
-		return ErrSrcNotSupportDir
-	}
-
-	// construct file
 	srcFile, err := os.Open(src)
 	if err != nil {
 		return err
 	}
-	defer srcFile.Close()
 
-	_, err = io.Copy(fileInZip, srcFile)
+	// write tar file
+	// NOTE: Must add header, else error: write too long
+	hdr, err := tar.FileInfoHeader(srcInfo, "")
+	if err != nil {
+		return err
+	}
+
+	err = w.WriteHeader(hdr)
+	if err != nil {
+		return err
+	}
+
+	_, err = io.Copy(w, srcFile)
 	if err != nil {
 		return err
 	}
@@ -84,17 +84,6 @@ func Extract(dst, src string) error {
 	return nil
 }
 
-// Return abs dir
-// if dst has not dir path, then use current dir
-func absDir(dst string) (string, error) {
-	abspath, err := filepath.Abs(dst)
-	if err != nil {
-		return "", err
-	}
-
-	return filepath.Dir(abspath), nil
-}
-
 func init() {
-	compress.RegisterFormat(".zip", Compress, Extract)
+	compress.RegisterFormat(".tar", Compress, Extract)
 }
